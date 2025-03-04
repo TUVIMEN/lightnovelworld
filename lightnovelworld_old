@@ -1,0 +1,77 @@
+#!/bin/bash
+# by Dominik Stanisław Suchora <suchora.dominik7@gmail.com>
+# License: GNU GPLv3
+
+IFS=$'\n'
+shopt -s extglob
+
+ucurl() {
+    echo "$@" >&2
+    curl -k -L -g -m 30 -s "$@" --compressed -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:135.0) Gecko/20100101 Firefox/135.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate, br, zstd' -H 'DNT: 1' -H 'Sec-GPC: 1' -H 'Connection: keep-alive' -H 'Cookie: lncoreantifrg=CfDJ8JRflp_zad9HkJlw28G7ohR7Yjd44V5IQ6OpHN7B7BkktLgUqwlR20gsH6l2xMCxA-qUzWYGpK6vw0hnP3bXVl97JzVo-NrveI_9rqMmICxtus4ncazGA2zl-XzJq5SNurvieceNKnRfn_HB3ay1ajk; lnusrconf=16%2Cdefault%2Ctrue%2Cblack%2Cpurple%2Cen%2C0%2C1; _lnvstuid=v2_d73c652592194f4c4bf8b55c81801fc5_0.7; cf_clearance=X7szERliuMF1FN1vnz7gCh3rELxm7Zu2INBmWjj8dUI-1741066954-1.2.1.1-6O_o9v0J7I10ULaqT7C1DYEkZPyZNSvCZPe5daooSzbYFSLMjJ2kW0p2pM1U.lLo3hwdfIad6SzKT6ruf.D5E0ZhrJj7CVKMyoD47spEEoWxy20mnLU6RlzzLLM_encE.YDTLux54oTDdmyOu1iYMFbCSxlveZAGe8vkYNmd2SE8b1st6dCC61A_FyUxR9bdrNgQb0SODZCSloqn4Ix0oqLzq0Otluyfs8GhnS1zpjvfk9eRLC5i6OxRPB2jD9SoFiGcjXr14PEln5iKP40zx7qCTX.iwXvAdFhbO_E4j_Tn_hHEZw5vTIFlulRVgCPUBHelDemrgpL.56YLVj6UvRUTRJFQzwNvpWp7uP6XR0uiBXiuefcItsVz.DAi9ILrOEQlhBhJydexvdevqibVaEg0xk8Jksye0rRsD1HeiMpMiv0xL92J6Ygy9iW8D.rp_oAzCgxesUHhg7nGK59QGoZR1kBYaUxlkKsHlCRRCOg' -H 'Upgrade-Insecure-Requests: 1' -H 'Sec-Fetch-Dest: document' -H 'Sec-Fetch-Mode: navigate' -H 'Sec-Fetch-Site: none' -H 'Sec-Fetch-User: ?1' -H 'Priority: u=0, i'
+}
+
+get_chapter() {
+    local fname="$(md5sum <<< "$1" | cut -f1 -d ' ')"
+    [ -s "$fname" ] && return
+
+    sleep 4 $((RANDOM%6))
+    local t="$(ucurl "$1")" title
+
+    title="$(reliq 'h1 itemprop=headline; [0] span .chapter-title | "%Di" trim' <<< "$t" | sed 's#/#|#g')"
+    [ -z "$title" ] && {
+        echo "$t"
+        echo "failed getting chapter '$1'" >&2
+        return
+    }
+    #[ -s "$title" ] && return
+    {
+        echo "$title"
+        echo
+        reliq 'div #chapter-container; p child@ | "%T\n\n"' <<< "$t"
+    } > "$fname" #> "$title"
+}
+
+get_novel_chapters() {
+    local next="$1" t i
+    while :
+    do
+        t="$(ucurl "$next")"
+
+        for i in $(reliq '[0] ul .chapter-list; a title | "https://www.lightnovelworld.com%(href)v\n"' <<< "$t")
+        do
+            get_chapter "$i"
+        done
+
+        next="$(reliq '[0] li .PagedList-skipToNext; [0] a | "https://www.lightnovelworld.com%(href)v"' <<< "$t")"
+        [ -z "$next" ] && break
+    done
+}
+
+get_novel() {
+    local -r t="$(ucurl "$1")"
+    local title
+    title="$(reliq '[0] h1 .novel-title c@[0] | "%i\n"' <<< "$t" | sed 's#/#|#g')"
+    [ -z "$title" ] && {
+        echo "failed getting novel '$1'" >&2
+        return
+    }
+    mkdir "$title"
+    cd "$title" || continue
+
+    get_novel_chapters "$1/chapters"
+
+    cd ..
+}
+
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+        https://www.lightnovelworld.com/novel/+([^/])?(/))
+            get_novel "$1";;
+        https://www.lightnovelworld.com/novel/+([^/])/chapters?(\?page=+([0-9])))
+            get_novel_chapters "$1";;
+        https://www.lightnovelworld.com/novel/+([^/])/+([^/])?(/))
+            get_chapter "$1";;
+    esac
+    shift
+done
