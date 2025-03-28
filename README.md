@@ -42,32 +42,32 @@ If you want your chapters to be named by their title run this after downloading:
 
 Download chapter, novel, or pages of novels from `URL`s to `DIR`
 
-    lightnovelworld.py --directory DIR URL1 URL2 URL3
+    lightnovelworld --directory DIR URL1 URL2 URL3
 
 Explicitly treat `URL`s to be of certain types, `URL5` and `URL6` will be guessed
 
-    lightnovelworld.py --chapter URL1 --novel URL2 --chapters URL3 --pages URL4 URL5 URL6
+    lightnovelworld --chapter URL1 --novel URL2 --chapters URL3 --pages URL4 URL5 URL6
 
 Download a novel, this will create directory `Shadow Slave`, and inside of it chapters will be written named by `sha256` of their urls. Running this command in directory where it has already been downloaded will ommit downloaded parts.
 
-    lightnovelworld.py 'https://www.lightnovelworld.com/novel/shadow-slave-05122222'
+    lightnovelworld 'https://www.lightnovelworld.com/novel/shadow-slave-05122222'
 
 Download guessing from URL with waiting `2.5` seconds and randomly waiting up to `1500` miliseconds for each request
 
-    lightnovelworld.py --wait 2.5 --wait-random 1500 URL
+    lightnovelworld --wait 2.5 --wait-random 1500 URL
 
 Download from `URL` using `4` retries and waiting `60` seconds between them
 
-    lightnovelworld.py --retries 4 --retry-wait 60 URL
+    lightnovelworld --retries 4 --retry-wait 60 URL
 
 Download `URL` with timeout set to `60` seconds and custom user-agent
 
-    lightnovelworld.py --timeout 60 --user-agent 'I AM NOT A BOT'
+    lightnovelworld --timeout 60 --user-agent 'I AM NOT A BOT'
 
 Choose browser from which cookies will be extracted (same names as for `browser_cookie3` lib)
 
-    lightnovelworld.py --browser firefox URL
+    lightnovelworld --browser firefox URL
 
 Get some help
 
-    lightnovelworld.py --help
+    lightnovelworld --help
