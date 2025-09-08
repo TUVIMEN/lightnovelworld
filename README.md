@@ -52,9 +52,9 @@ Download a novel, this will create directory `Shadow Slave`, and inside of it ch
 
     lightnovelworld 'https://www.lightnovelworld.com/novel/shadow-slave-05122222'
 
-Download guessing from URL with waiting `2.5` seconds and randomly waiting up to `1500` miliseconds for each request
+Download guessing from URL with waiting `2.5` seconds and randomly waiting up to `1.5` seconds for each request
 
-    lightnovelworld --wait 2.5 --wait-random 1500 URL
+    lightnovelworld --wait 2.5 --wait-random 1.5 URL
 
 Download from `URL` using `4` retries and waiting `60` seconds between them
 
