@@ -58,7 +58,7 @@ Download guessing from URL with waiting `2.5` seconds and randomly waiting up to
 
 Download from `URL` using `4` retries and waiting `60` seconds between them
 
-    lightnovelworld --retries 4 --retry-wait 60 URL
+    lightnovelworld --retry 4 --retry-delay 60 URL
 
 Download `URL` with timeout set to `60` seconds and custom user-agent
 
